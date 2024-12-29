@@ -105,6 +105,11 @@ void uif::features::memory_patcher::initialize()
 
 	for(const auto& patch : patches)
 	{
+		if(_debug)
+		{
+			std::cout << *this << " Patching " << patch.length << " bytes at " << blue(patch.address) << "\n";
+		}
+
 		utils::patch_memory(patch.address, patch.patch_value, patch.length, patch.original_value);
 	}
 }
