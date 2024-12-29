@@ -49,7 +49,9 @@ namespace uif
 		if(attached) return;
 		attached = true;
 
-		enabled = config().value("/injector/enable"_json_pointer, true);
+		auto& injector_config = config()["injector"];
+
+		enabled = injector_config.value("enable", true);
 		if(!enabled) {
 			utils::debug_log("injector::attach: disabled");
 			libraries::load();
@@ -62,7 +64,7 @@ namespace uif
 		std::cout << white("[injector] ======================================================\n");
 		std::cout << white("[injector]") << " Injecting into module " << yellow(utils::get_module_name(game_module)) << " at address " << blue(game_module) << '\n';
 
-		if(config().value("/injector/print_loaded_modules"_json_pointer, false))
+		if(injector_config.value("print_loaded_modules", false))
 		{
 			std::cout << white("[injector]") << " Loaded modules:\n";
 			HMODULE hModule = nullptr;
@@ -72,9 +74,9 @@ namespace uif
 			}
 		}
 
-		if(config().contains("/injector/load_modules"_json_pointer))
+		if(injector_config.contains("load_modules"))
 		{
-			auto& loadModules = config()["/injector/load_modules"_json_pointer];
+			auto& loadModules = injector_config["load_modules"];
 
 			if(loadModules.is_array()) {
 
@@ -99,9 +101,9 @@ namespace uif
 			}
 		}
 
-		if(config().contains("/injector/hook_modules"_json_pointer))
+		if(injector_config.contains("hook_modules"))
 		{
-			auto& additionalHookModules = config()["/injector/hook_modules"_json_pointer];
+			auto& additionalHookModules = injector_config["hook_modules"];
 
 			if(additionalHookModules.is_array()) {
 
@@ -168,9 +170,9 @@ namespace uif
 	{
 		std::string dllPath;
 
-		if(config().contains("/real_library_location"_json_pointer))
+		if(config().contains("/injector/real_library_location"_json_pointer))
 		{
-			const auto& value = config()["/real_library_location"_json_pointer];
+			const auto& value = config()["/injector/real_library_location"_json_pointer];
 			if(value.is_string())
 			{
 				value.get_to(dllPath);
