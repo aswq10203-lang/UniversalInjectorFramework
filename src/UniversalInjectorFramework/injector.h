@@ -35,7 +35,6 @@ namespace uif
 		}
 
 	private:
-		static injector* _instance;
 		nlohmann::json _config;
 		std::vector<features::feature_base*> features;
 		bool enabled = false;

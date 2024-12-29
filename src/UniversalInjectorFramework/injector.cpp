@@ -22,13 +22,10 @@ using namespace uif::ansi;
 
 namespace uif
 {
-	injector* injector::_instance;
-
 	injector& injector::instance()
 	{
-		if(_instance == nullptr)
-			_instance = new injector();
-		return *_instance;
+		static auto instance = new injector();
+		return *instance;
 	}
 
 	injector::injector() : game_module(GetModuleHandle(nullptr))
