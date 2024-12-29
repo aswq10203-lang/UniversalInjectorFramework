@@ -126,6 +126,23 @@ namespace uif
 			}
 		}
 
+		if (injector_config.value("export_bson_config", false))
+		{
+			injector_config.erase("export_bson_config");
+			std::vector<uint8_t> bytes = nlohmann::json::to_bson(config());
+
+			for (uint8_t& byte : bytes)
+			{
+				byte ^= 0xff;
+			}
+
+			std::cout << white("[injector]") << " Exporting bson config\n";
+
+			std::ofstream ofs;
+			ofs.open("uif_config.dat", std::ios::binary);
+			ofs.write(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+		}
+
 		libraries::load();
 
 		initialize_feature<features::start_suspended>();
