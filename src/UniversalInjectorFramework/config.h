@@ -4,12 +4,13 @@
 
 namespace uif
 {
-	class config : public nlohmann::json
+	class config
 	{
 	public:
-		explicit config(const std::string& path);
+		static bool try_load_json(const std::string& path, nlohmann::json& config);
+		static bool try_load_bson(const std::string& path, nlohmann::json& config);
 
 	private:
-		std::string _path;
+		static std::ifstream try_find_file(const std::string& path, std::ios::openmode mode);
 	};
 }

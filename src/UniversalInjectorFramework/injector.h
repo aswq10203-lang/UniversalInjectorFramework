@@ -9,7 +9,7 @@ namespace uif
 	public:
 		static injector& instance();
 		injector();
-		config& config();
+		nlohmann::json& config();
 		void attach();
 		void detach();
 		template<typename T> T& feature() const;
@@ -36,7 +36,7 @@ namespace uif
 
 	private:
 		static injector* _instance;
-		uif::config _config;
+		nlohmann::json _config;
 		std::vector<features::feature_base*> features;
 		bool enabled = false;
 		bool attached = false;

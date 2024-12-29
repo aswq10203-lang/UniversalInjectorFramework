@@ -31,9 +31,15 @@ namespace uif
 		return *_instance;
 	}
 
-	injector::injector() : game_module(GetModuleHandle(nullptr)), _config("uif_config.json") {}
+	injector::injector() : game_module(GetModuleHandle(nullptr))
+	{
+		if (config::try_load_json("uif_config.json", _config)) return;
+		if (config::try_load_bson("uif_config.dat", _config)) return;
 
-	config& injector::config()
+		utils::fail("Failed to find uif config file.");
+	}
+
+	nlohmann::json& injector::config()
 	{
 		return _config;
 	}
