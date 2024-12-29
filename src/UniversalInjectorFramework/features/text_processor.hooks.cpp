@@ -71,11 +71,14 @@ namespace uif::features
 			const auto processed = text_processor().process(converted, api::MultiByteToWideChar);
 			const int processedLength = static_cast<int>(cbMultiByte < 0 ? processed.length() + 1 : processed.length());
 
-			if (cchWideChar == 0)
+			if (cchWideChar == 0 || !lpWideCharStr)
 				return processedLength;
 
 			if (processedLength > cchWideChar)
+			{
+				SetLastError(ERROR_INSUFFICIENT_BUFFER);
 				return 0;
+			}
 
 			// don't use string copy here because we don't necessarily want a null terminator
 			memcpy_s(lpWideCharStr, cchWideChar * sizeof(wchar_t), processed.c_str(), processedLength * sizeof(wchar_t));
