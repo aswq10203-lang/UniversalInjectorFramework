@@ -62,7 +62,7 @@ namespace uif::utils
 			return parse_address(json.get<std::string>());
 
 		if(json.is_number_integer())
-			return reinterpret_cast<void*>(json.get<uintptr_t>());
+			return GetModuleHandleA(nullptr) + json.get<uintptr_t>();
 
 		std::cout << white("[injector]") << dark_red(" Error:") <<
 			" Failed to parse address " << blue('<') << blue(json.type_name()) << blue('>') << ": invalid json type\n";
@@ -90,6 +90,10 @@ namespace uif::utils
 			}
 
 			address += reinterpret_cast<uintptr_t>(hModule);
+		}
+		else
+		{
+			address += reinterpret_cast<uintptr_t>(GetModuleHandleA(nullptr));
 		}
 
 		return reinterpret_cast<void*>(address);
