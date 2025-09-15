@@ -17,8 +17,22 @@ struct export_symbol
 {
 	const unsigned long ordinal;
 	const std::string name;
+	const std::string safe_name;
 	const bool has_name;
 };
+
+std::string get_safe_name(std::string name)
+{
+	for (char& ch : name)
+	{
+		if (!IsCharAlphaNumericA(ch))
+		{
+			ch = '_';
+		}
+	}
+
+	return name;
+}
 
 std::vector<export_symbol> enumerate_exports(HMODULE moduleHandle)
 {
@@ -32,11 +46,12 @@ std::vector<export_symbol> enumerate_exports(HMODULE moduleHandle)
 		auto* symbols = static_cast<std::vector<export_symbol>*>(pContext);
 		if(pszName)
 		{
-			symbols->push_back({ nOrdinal, pszName, true });
+			symbols->push_back({ nOrdinal, pszName, get_safe_name(pszName), true});
 		}
 		else
 		{
-			symbols->push_back({ nOrdinal, "Ordinal" + std::to_string(nOrdinal), false });
+			const std::string dummyName = "Ordinal" + std::to_string(nOrdinal);
+			symbols->push_back({ nOrdinal, dummyName, dummyName, false });
 		}
 		return true;
 	};
@@ -57,7 +72,7 @@ bool generate_module_definition(const std::string& dllName, const std::vector<ex
 
 	for(const auto& symbol : exports)
 	{
-		file << '\t' << symbol.name << "=lib_" << dllName << '_' << symbol.name << " @" << symbol.ordinal << (symbol.has_name ? "\n" : " NONAME\n");
+		file << '\t' << symbol.name << "=lib_" << dllName << '_' << symbol.safe_name << " @" << symbol.ordinal << (symbol.has_name ? "\n" : " NONAME\n");
 	}
 
 	return true;
@@ -81,14 +96,14 @@ bool generate_cpp_file(const std::string& dllName, const std::vector<export_symb
 
 	for(const auto& symbol : exports)
 	{
-		file << "\tFARPROC " << symbol.name << ";\n";
+		file << "\tFARPROC " << symbol.safe_name << ";\n";
 	}
 
 	file << "} " << dllName << ";\n\n";
 
 	for(const auto& symbol : exports)
 	{
-		file << "void lib_" << dllName << '_' << symbol.name << "() { " << dllName << '.' << symbol.name << "(); }\n";
+		file << "void lib_" << dllName << '_' << symbol.safe_name << "() { " << dllName << '.' << symbol.safe_name << "(); }\n";
 	}
 
 	file << "\nbool load_library_" << dllName << "() {\n";
@@ -96,10 +111,10 @@ bool generate_cpp_file(const std::string& dllName, const std::vector<export_symb
 
 	for(const auto& symbol : exports)
 	{
-		file << '\t' << dllName << '.' << symbol.name << " = GetProcAddress(" << dllName << ".dll, ";
+		file << '\t' << dllName << '.' << symbol.safe_name << " = GetProcAddress(" << dllName << ".dll, ";
 		if(symbol.has_name)
 		{
-			file << '"' << symbol.name << "\");\n";
+			file << '"' << symbol.safe_name << "\");\n";
 		}
 		else
 		{
@@ -146,7 +161,7 @@ bool generate_files(const std::string& dllPath, const std::vector<export_symbol>
 	auto endIndex = dllPath.find_last_of('.');
 	if(endIndex == std::string::npos) endIndex = dllPath.length();
 
-	const std::string dllName = dllPath.substr(startIndex, endIndex - startIndex);
+	const std::string dllName = get_safe_name(dllPath.substr(startIndex, endIndex - startIndex));
 
 	if(!generate_module_definition(dllName, exports))
 		return false;
