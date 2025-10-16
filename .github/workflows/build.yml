@@ -7,14 +7,10 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-- name: Build (MSBuild)
-  shell: cmd
-  run: |
-    "%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe > msbuild_path.txt
-    set /p MSBUILD_PATH=<msbuild_path.txt
-    echo Found MSBuild at: %MSBUILD_PATH%
-    "%MSBUILD_PATH%" UniversalInjectorFramework.sln /p:Configuration=Release /p:Platform=x86 /m
-
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+      - name: Build (MSBuild)
+        run: msbuild UniversalInjectorFramework.sln /p:Configuration=Release /p:Platform=x86 /m
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
