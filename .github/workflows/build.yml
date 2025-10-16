@@ -10,7 +10,7 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
       - name: Build (MSBuild)
-        run: msbuild src/UniversalInjectorFramework.sln /p:Configuration=Release /p:Platform=x86 /m
+        run: msbuild src/UniversalInjectorFramework.sln /p:Configuration=Release
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
